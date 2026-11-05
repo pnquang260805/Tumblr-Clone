@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
@@ -14,4 +16,5 @@ public class UserResponse {
     private String username;
     private String email;
     private String displayName;
+    private List<PostResponse> postResponses;
 }
