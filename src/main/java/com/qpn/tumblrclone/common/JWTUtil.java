@@ -52,4 +52,11 @@ public class JWTUtil {
         JWSObject object = JWSObject.parse(token);
         return object.getPayload().toJSONObject();
     }
+
+    public String parseAuthHeader(String authHeader){
+        String token = authHeader;
+        if(authHeader != null && authHeader.startsWith("Bearer "))
+            token = authHeader.substring(7);
+        return token;
+    }
 }

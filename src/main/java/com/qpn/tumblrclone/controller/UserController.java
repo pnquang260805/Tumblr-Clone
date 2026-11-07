@@ -36,7 +36,7 @@ public class UserController {
 
     @GetMapping("/me")
     public UserResponse findMe(@RequestHeader("Authorization") String authHeader) throws ParseException, JOSEException {
-        // CẦN REFACTOR
+        // CẦN REFACTOR bằng builder pattern
         String token = authHeader;
         if(authHeader != null && authHeader.startsWith("Bearer "))
             token = authHeader.substring(7);
