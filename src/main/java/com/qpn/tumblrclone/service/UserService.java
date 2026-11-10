@@ -2,7 +2,9 @@ package com.qpn.tumblrclone.service;
 
 import com.nimbusds.jose.JOSEException;
 import com.qpn.tumblrclone.common.JWTUtil;
+import com.qpn.tumblrclone.model.Post;
 import com.qpn.tumblrclone.model.User;
+import com.qpn.tumblrclone.repository.PostRepository;
 import com.qpn.tumblrclone.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,11 +15,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+// Sửa lại response
 @Service
 public class UserService {
     @Autowired private UserRepository userRepository;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private JWTUtil jwtUtil;
+    // Check lại xem có được dùng post repository ở đây ko (check google, ko phải dùng AI)
+    @Autowired private PostRepository postRepository;
 
     public User createUser(User u){
         Optional<User> user = userRepository.findByEmail(u.getEmail());
@@ -55,5 +60,16 @@ public class UserService {
         Integer userId = userIdNumber.intValue();
         User user = findById(userId);
         return user;
+    }
+
+    public void deleteUser(String authHeader) throws ParseException, JOSEException {
+        String token = jwtUtil.parseAuthHeader(authHeader);
+        // đang bị lặp code. khả năng sẽ phải có thêm 1 cái middle ware
+        if(!jwtUtil.verifyToken(token)){
+            throw new RuntimeException("Invalid token");
+        }
+        User user = getUserByToken(token);
+        postRepository.deleteAll(user.getPosts());
+        userRepository.delete(user);
     }
 }

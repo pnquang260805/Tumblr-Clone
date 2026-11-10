@@ -21,17 +21,12 @@ public class UserController {
     @PostMapping("/register")
     public UserResponse createUser(@RequestBody User u){
         User user = userService.createUser(u);
-        UserResponse response = new UserResponse();
-        response.setDisplayName(user.getDisplayName());
-        response.setEmail(user.getEmail());
-        response.setId(user.getId());
-        response.setUsername(user.getUsername());
-        return response;
+        return mapping.userResponseMapping(user);
     }
 
     @GetMapping
-    public List<User> findAllUser(){
-        return userService.getAllUser();
+    public List<UserResponse> findAllUser(){
+        return userService.getAllUser().stream().map(user -> mapping.userResponseMapping(user)).toList();
     }
 
     @GetMapping("/me")
@@ -41,15 +36,14 @@ public class UserController {
         if(authHeader != null && authHeader.startsWith("Bearer "))
             token = authHeader.substring(7);
         User user = userService.getUserByToken(token);
-        UserResponse response = new UserResponse();
-        response.setDisplayName(user.getDisplayName());
-        response.setEmail(user.getEmail());
-        response.setId(user.getId());
-        response.setUsername(user.getUsername());
-        // Có thể cần refactor lại chỗ này
-        List<PostResponse> postResponses = user.getPosts().stream().map(post -> mapping.postMapping(post)).toList();
-        response.setPostResponses(postResponses);
+        // Tạo lại mapping cho user
 
-        return response;
+        return mapping.userResponseMapping(user);
+    }
+
+    @DeleteMapping
+    public String deleteUser(@RequestHeader("Authorization") String authHeader) throws ParseException, JOSEException {
+        userService.deleteUser(authHeader);
+        return "Done";
     }
 }
