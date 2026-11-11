@@ -18,3 +18,15 @@ spring:
     properties:
       hibernate:
         format_sql: true
+#  Cấu hình kích thước đầu vào
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+s3:
+  endpoint: http://localhost:9000
+  accessKey: admin
+  secretKey: password
+  bucket: my-bucket
+  region: us-east-1

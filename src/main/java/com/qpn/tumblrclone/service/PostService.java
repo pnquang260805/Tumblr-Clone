@@ -8,9 +8,11 @@ import com.qpn.tumblrclone.model.User;
 import com.qpn.tumblrclone.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.text.ParseException;
 import java.util.List;
+import java.util.UUID;
 
 // Đang lặp code validate user. Có thể làm thêm 1 hàm helper với param: (token, Integer id)
 
@@ -19,16 +21,29 @@ public class PostService {
     @Autowired private PostRepository postRepository;
     @Autowired private UserService userService;
     @Autowired private JWTUtil jwtUtil;
+    @Autowired private S3Service s3Service;
 
     public Post createPost(String authHeader, PostRequest request) throws ParseException, JOSEException {
         String token = jwtUtil.parseAuthHeader(authHeader);
         User u = userService.getUserByToken(token);
 
         Post post = new Post();
+        String postId = UUID.randomUUID().toString();
+        post.setId(postId);
         post.setContent(request.getContent());
         post.setUser(u);
 
-        u.getPosts().add(post);
+//        u.getPosts().add(post);
+        // Post là bên sở hữu quan hệ (có @JoinColumn), chỉ cần post.setUser(u) là DB lưu đúng user_id: ????????????
+        for(MultipartFile f : request.getMediaFiles()){
+            String fileName = s3Service.generateFileName(u.getId(), postId, f);
+            try{
+                s3Service.uploadToS3(fileName, f);
+                post.getMediaUrl().add(fileName);
+            } catch (Exception e){
+                throw new RuntimeException("Error when upload file " + fileName);
+            }
+        }
 
         return postRepository.save(post);
     }

@@ -8,6 +8,7 @@ import com.qpn.tumblrclone.common.Mapping;
 import com.qpn.tumblrclone.model.Post;
 import com.qpn.tumblrclone.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
@@ -24,9 +25,9 @@ public class PostController {
     @Autowired
     private JWTUtil jWTUtil;
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public PostResponse createPost(@RequestHeader("Authorization") String authHeader,
-                                   @RequestBody PostRequest request) throws ParseException, JOSEException {
+                                   @ModelAttribute PostRequest request) throws ParseException, JOSEException { // Xem lại cái này
         Post post = postService.createPost(authHeader, request);
         return mapping.postMapping(post);
     }
