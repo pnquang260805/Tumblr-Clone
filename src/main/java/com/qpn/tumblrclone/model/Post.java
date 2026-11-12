@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +23,7 @@ public class Post {
     @JoinColumn(name = "user_id")
     private User user;
     private String content;
+    private LocalDateTime postedTime;
 
     private List<String> mediaUrl = new ArrayList<>();
 }

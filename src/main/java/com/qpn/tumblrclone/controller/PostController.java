@@ -44,7 +44,7 @@ public class PostController {
 
     @PutMapping
     public PostResponse updatePost(@RequestHeader("Authorization") String authHeader,
-                                   @RequestParam Integer id,
+                                   @RequestParam String id,
                                    @RequestBody PostRequest request) throws ParseException, JOSEException {
         // Token lưu ở máy người dùng --> Khả năng là sẽ ko có người nào (không phải hacker) có được mà truyền vào
         Post post = postService.updatePost(authHeader, id, request);
@@ -53,12 +53,12 @@ public class PostController {
 
     @DeleteMapping
     public String deletePost(@RequestHeader("Authorization") String authHeader,
-                             @RequestParam Integer id) throws ParseException, JOSEException {
+                             @RequestParam String id) throws ParseException, JOSEException {
         return postService.deletePost(authHeader, id);
     }
 
     @GetMapping("/{id}")
-    public PostResponse getPost(@PathVariable Integer id){
+    public PostResponse getPost(@PathVariable String id){
         return mapping.postMapping(postService.readPost(id));
     }
 }

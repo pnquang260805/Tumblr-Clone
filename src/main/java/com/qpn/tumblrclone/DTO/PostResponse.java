@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @AllArgsConstructor
@@ -15,5 +16,6 @@ public class PostResponse {
     private String id;
     private Integer userId;
     private String content;
+    private LocalDateTime postedTime;
     private List<String> mediaUrl;
 }

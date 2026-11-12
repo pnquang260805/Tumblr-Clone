@@ -13,7 +13,11 @@ services:
     command: server /data --console-address ":9001"
     networks:
       - project_net
-
+    deploy:
+      resources:
+        limits:
+          cpus: '0.01'
+          memory: 300M
   minio-init:
     container_name: minio-init
     image: amazon/aws-cli:latest
@@ -28,8 +32,11 @@ services:
       until aws --endpoint-url http://minio:9000 s3 ls > /dev/null 2>&1; do
         echo 'Waiting for MinIO...'; sleep 2;
       done;
-      aws --endpoint-url http://minio:9000 s3 mb s3://my-bucket || true;
-      echo 'Bucket ready';
+      if aws --endpoint-url http://minio:9000 s3api head-bucket --bucket my-bucket > /dev/null 2>&1; then
+        echo 'Bucket my-bucket already exists, skipping creation';
+      else
+        aws --endpoint-url http://minio:9000 s3 mb s3://my-bucket && echo 'Bucket created';
+      fi;
       "
     restart: "no"
     networks:

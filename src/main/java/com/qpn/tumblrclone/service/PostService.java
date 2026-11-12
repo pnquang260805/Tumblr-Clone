@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,6 +34,7 @@ public class PostService {
         post.setId(postId);
         post.setContent(request.getContent());
         post.setUser(u);
+        post.setPostedTime(LocalDateTime.now());
 
 //        u.getPosts().add(post);
         // Post là bên sở hữu quan hệ (có @JoinColumn), chỉ cần post.setUser(u) là DB lưu đúng user_id: ????????????
@@ -48,7 +51,7 @@ public class PostService {
         return postRepository.save(post);
     }
 
-    public Post updatePost(String authHeader, Integer postId, PostRequest request) throws ParseException, JOSEException {
+    public Post updatePost(String authHeader, String postId, PostRequest request) throws ParseException, JOSEException {
         Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not exist"));
 
         // Xác thực xem người dùng có đúng là chủ post hay không
@@ -63,7 +66,7 @@ public class PostService {
         return postRepository.save(post);
     }
 
-    public Post readPost(Integer postId){
+    public Post readPost(String postId){
         return postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not exist"));
     }
 
@@ -74,7 +77,7 @@ public class PostService {
         return u.getPosts();
     }
 
-    public String deletePost(String authHeader, Integer postId) throws ParseException, JOSEException {
+    public String deletePost(String authHeader, String postId) throws ParseException, JOSEException {
         Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not exist"));
         String token = jwtUtil.parseAuthHeader(authHeader);
         User u = userService.getUserByToken(token);

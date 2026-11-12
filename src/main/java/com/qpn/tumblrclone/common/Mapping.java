@@ -20,6 +20,7 @@ public class Mapping {
         response.setId(post.getId());
         response.setContent(post.getContent());
         response.setUserId(post.getUser().getId());
+        response.setPostedTime(post.getPostedTime());
         // ???????????????????????????????
         response.setMediaUrl(post.getMediaUrl().stream().map(s3Service::generatePresignedUrl).toList());
         return response;
