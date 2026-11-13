@@ -5,6 +5,7 @@ import com.qpn.tumblrclone.DTO.PostResponse;
 import com.qpn.tumblrclone.DTO.UserResponse;
 import com.qpn.tumblrclone.common.Mapping;
 import com.qpn.tumblrclone.model.User;
+import com.qpn.tumblrclone.service.UserPostService;
 import com.qpn.tumblrclone.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,7 @@ import java.util.List;
 public class UserController {
     @Autowired private UserService userService;
     @Autowired private Mapping mapping;
+    @Autowired private UserPostService userPostService;
 
     @PostMapping("/register")
     public UserResponse createUser(@RequestBody User u){
@@ -43,7 +45,7 @@ public class UserController {
 
     @DeleteMapping
     public String deleteUser(@RequestHeader("Authorization") String authHeader) throws ParseException, JOSEException {
-        userService.deleteUser(authHeader);
+        userPostService.deleteUser(authHeader);
         return "Done";
     }
 }

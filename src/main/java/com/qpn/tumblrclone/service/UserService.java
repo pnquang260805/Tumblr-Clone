@@ -21,7 +21,7 @@ public class UserService {
     @Autowired private UserRepository userRepository;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private JWTUtil jwtUtil;
-    // Check lại xem có được dùng post repository ở đây ko (check google, ko phải dùng AI)
+    // Check lại xem có được dùng post repository ở đây ko
     @Autowired private PostRepository postRepository;
 
     public User createUser(User u){
@@ -62,14 +62,7 @@ public class UserService {
         return user;
     }
 
-    public void deleteUser(String authHeader) throws ParseException, JOSEException {
-        String token = jwtUtil.parseAuthHeader(authHeader);
-        // đang bị lặp code. khả năng sẽ phải có thêm 1 cái middle ware
-        if(!jwtUtil.verifyToken(token)){
-            throw new RuntimeException("Invalid token");
-        }
-        User user = getUserByToken(token);
-        postRepository.deleteAll(user.getPosts());
-        userRepository.delete(user);
+    public void deleteUser(User u){
+        userRepository.delete(u);
     }
 }

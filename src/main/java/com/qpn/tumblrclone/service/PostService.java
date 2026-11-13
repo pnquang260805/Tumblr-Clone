@@ -87,4 +87,8 @@ public class PostService {
         postRepository.delete(post);
         return "Done";
     }
+
+    public void deletePosts(List<Post> posts){
+        postRepository.deleteAll(posts);
+    }
 }
