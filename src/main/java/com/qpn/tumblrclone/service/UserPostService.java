@@ -15,13 +15,8 @@ public class UserPostService {
     @Autowired private PostService postService;
     @Autowired private JWTUtil jwtUtil;
 
-    public void deleteUser(String authHeader) throws ParseException, JOSEException {
-        String token = jwtUtil.parseAuthHeader(authHeader);
-        // đang bị lặp code. khả năng sẽ phải có thêm 1 cái middle ware
-        if(!jwtUtil.verifyToken(token)){
-            throw new RuntimeException("Invalid token");
-        }
-        User user = userService.getUserByToken(token);
+    public void deleteUser(Integer userId){
+        User user = userService.findById(userId);
         postService.deletePosts(user.getPosts());
         userService.deleteUser(user);
     }

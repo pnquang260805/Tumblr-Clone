@@ -7,6 +7,7 @@ import com.qpn.tumblrclone.common.JWTUtil;
 import com.qpn.tumblrclone.common.Mapping;
 import com.qpn.tumblrclone.model.Post;
 import com.qpn.tumblrclone.service.PostService;
+import com.qpn.tumblrclone.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -14,47 +15,42 @@ import org.springframework.web.bind.annotation.*;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/post")
 public class PostController {
-    @Autowired
-    private PostService postService;
-    @Autowired
-    private Mapping mapping;
-    @Autowired
-    private JWTUtil jWTUtil;
+    @Autowired private PostService postService;
+    @Autowired private Mapping mapping;
+    @Autowired private JWTUtil jwtUtil;
+
+    private Integer getUserIdFromAuthHeader(String authHeader) throws ParseException {
+        String token = authHeader;
+        if(authHeader != null && authHeader.startsWith("Bearer "))
+            token = authHeader.substring(7);
+        Map<String, Object> payload = jwtUtil.getPayload(token);
+        return Integer.valueOf(payload.get("userId").toString());
+    }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public PostResponse createPost(@RequestHeader("Authorization") String authHeader,
-                                   @ModelAttribute PostRequest request) throws ParseException, JOSEException { // Xem lại cái này
-        Post post = postService.createPost(authHeader, request);
+                                   @ModelAttribute PostRequest request) throws ParseException { // Xem lại cái này
+        Integer userId = getUserIdFromAuthHeader(authHeader);
+        Post post = postService.createPost(userId, request);
         return mapping.postMapping(post);
     }
 
-    @GetMapping // All by user
-    public List<PostResponse> allPostByUser(@RequestHeader("Authorization") String authHeader) throws ParseException, JOSEException {
-        List<Post> posts = postService.readAllPostOfUser(authHeader);
-        List<PostResponse> responses = new ArrayList<>();
-        for (Post post : posts) {
-            responses.add(mapping.postMapping(post));
-        }
-        return responses;
-    }
-
     @PutMapping
-    public PostResponse updatePost(@RequestHeader("Authorization") String authHeader,
-                                   @RequestParam String id,
-                                   @RequestBody PostRequest request) throws ParseException, JOSEException {
-        // Token lưu ở máy người dùng --> Khả năng là sẽ ko có người nào (không phải hacker) có được mà truyền vào
-        Post post = postService.updatePost(authHeader, id, request);
+    public PostResponse updatePost( @RequestParam String postId, // pre-condition: đã login
+                                   @RequestBody PostRequest request){
+        Post post = postService.updatePost(postId, request);
         return mapping.postMapping(post);
     }
 
     @DeleteMapping
-    public String deletePost(@RequestHeader("Authorization") String authHeader,
-                             @RequestParam String id) throws ParseException, JOSEException {
-        return postService.deletePost(authHeader, id);
+    public String deletePost(@RequestParam String id){
+        postService.deletePost(id);
+        return "Deleted post";
     }
 
     @GetMapping("/{id}")

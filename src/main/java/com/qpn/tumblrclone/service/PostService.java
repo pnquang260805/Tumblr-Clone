@@ -25,9 +25,8 @@ public class PostService {
     @Autowired private JWTUtil jwtUtil;
     @Autowired private S3Service s3Service;
 
-    public Post createPost(String authHeader, PostRequest request) throws ParseException, JOSEException {
-        String token = jwtUtil.parseAuthHeader(authHeader);
-        User u = userService.getUserByToken(token);
+    public Post createPost(Integer userId, PostRequest request) {
+        User u = userService.findById(userId);
 
         Post post = new Post();
         String postId = UUID.randomUUID().toString();
@@ -51,17 +50,8 @@ public class PostService {
         return postRepository.save(post);
     }
 
-    public Post updatePost(String authHeader, String postId, PostRequest request) throws ParseException, JOSEException {
+    public Post updatePost(String postId, PostRequest request) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not exist"));
-
-        // Xác thực xem người dùng có đúng là chủ post hay không
-        // Check bằng compare user id
-        String token = jwtUtil.parseAuthHeader(authHeader);
-        User u = userService.getUserByToken(token);
-        if(u.getId().compareTo(post.getUser().getId()) != 0){
-            throw new RuntimeException("Permission denied");
-        }
-
         post.setContent(request.getContent());
         return postRepository.save(post);
     }
@@ -70,22 +60,8 @@ public class PostService {
         return postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not exist"));
     }
 
-    // Check lại hàm này xem có vi phạm solid không
-    public List<Post> readAllPostOfUser(String authHeader) throws ParseException, JOSEException {
-        String token = jwtUtil.parseAuthHeader(authHeader);
-        User u = userService.getUserByToken(token);
-        return u.getPosts();
-    }
-
-    public String deletePost(String authHeader, String postId) throws ParseException, JOSEException {
-        Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not exist"));
-        String token = jwtUtil.parseAuthHeader(authHeader);
-        User u = userService.getUserByToken(token);
-        if(u.getId().compareTo(post.getUser().getId()) != 0){
-            throw new RuntimeException("Permission denied");
-        }
-        postRepository.delete(post);
-        return "Done";
+    public void deletePost(String postId) {
+        postRepository.delete(postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found")));
     }
 
     public void deletePosts(List<Post> posts){

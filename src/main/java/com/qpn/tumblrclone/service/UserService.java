@@ -20,9 +20,6 @@ import java.util.Optional;
 public class UserService {
     @Autowired private UserRepository userRepository;
     @Autowired private PasswordEncoder passwordEncoder;
-    @Autowired private JWTUtil jwtUtil;
-    // Check lại xem có được dùng post repository ở đây ko
-    @Autowired private PostRepository postRepository;
 
     public User createUser(User u){
         Optional<User> user = userRepository.findByEmail(u.getEmail());
@@ -48,21 +45,8 @@ public class UserService {
         return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    public User getUserByToken(String token) throws ParseException, JOSEException {
-        if(!jwtUtil.verifyToken(token)){
-            throw new RuntimeException("Invalid token");
-        }
-        Map<String, Object> payload = jwtUtil.getPayload(token);
-        // Bước 1: Ép về Number (lớp cha chung của Long và Integer)
-        Number userIdNumber = (Number) payload.get("userId");
-
-        // Bước 2: Chuyển sang Integer để truyền vào findById
-        Integer userId = userIdNumber.intValue();
-        User user = findById(userId);
-        return user;
-    }
-
     public void deleteUser(User u){
         userRepository.delete(u);
     }
+
 }
